@@ -6,7 +6,7 @@
 #include "urisc_v1.h"
 
 #include "stack.c"
-#include "varlist.c"
+#include "varlist_2.0.c"
 #include "var.c"
 
 // File stuff
@@ -62,11 +62,66 @@ int rstripCarriageReturns(char * _str, int _len)
 {
     int i = _len;
 
-    while (_str[i--] == '\r');
-
-    _str[i] = '\0';
+    while (_str[--i] == '\r' || _str[i] == '\0')
+        _str[i] = '\0';
 
     return i;
+}
+
+// Split a string at a given delimiter
+// (_delim is an array of characters)
+int split(char *** result, char * _str, char * _delim)
+{
+    int len = strlen(_str);
+
+    int reslimit = 64;
+    *result = malloc(reslimit * sizeof(char *));
+    int reslen = 0;
+
+    int currentstrlimit = 32;
+    char * currentstr = malloc(currentstrlimit);
+    int currentstrlen = 0;
+
+    for (int i = 0; i < len; i++)
+    {
+        // Delimiter found
+        if (_delim == strchr(_delim, _str[i]))
+        {
+            // Suffix string with a null byte
+            currentstr[currentstrlen] = '\0';
+
+            *result[reslen++] = currentstr;
+
+            // Expand list if it isn't big enough
+            if (reslen >= reslimit - 1)
+                *result = realloc(*result, (reslimit += 64) * sizeof(char *));
+
+            currentstrlimit = 32;
+            currentstr = malloc(currentstrlimit);
+            currentstrlen = 0;
+        }
+        // Delimiter not found
+        else
+        {
+            // Ignore carriage returns
+            if (_str[i] == '\r')
+                continue;
+
+            currentstr[currentstrlen++] = _str[i];
+
+            // Expand string if it isn't big enough
+            if (currentstrlen >= currentstrlimit - 1)
+                currentstr = realloc(currentstr, currentstrlimit += 32);
+        }
+    }
+
+    // Suffix string with a null byte
+    currentstr[currentstrlen++] = '\0';
+
+    // Final string
+    *result[reslen++] = currentstr;
+
+    return reslen;
 }
 
 char * minify_code(char * code)
@@ -158,7 +213,7 @@ int main(int argc, char ** argv)
 
     lineCount = 0;
     for (int i = 0; i < length; i++)
-        lineCount += (buffer[i] == '\n');
+        lineCount += (buffer[i] == '\n' || buffer[i] == ';');
 
     // Minify the whole program before running it
     // char * minified = minify_code(buffer);
@@ -185,36 +240,38 @@ int main(int argc, char ** argv)
     int i = 0;
     code = malloc(lineCount * sizeof(char *));
 
-    char * filePtr = strtok(buffer, "\n");
+    char * filePtr = strtok(buffer, "\n;");
     while (filePtr != NULL)
     {
         code[i] = filePtr;
-        int len = strlen(code[i]);
-        len = rstripCarriageReturns(code[i], len);
+        char ** line;
+        int len = split(&line, code[i], " ");
+
+        printf("[%s]\n", line[0]);
 
         // Define labels
         if (len == 1)
-            varlistAdd(labels, code[i][0], i);
+            varlistAdd(labels, line[0], i);
 
-        filePtr = strtok(NULL, "\n");
+        filePtr = strtok(NULL, "\n;");
         i++;
     }
 
     // (currentLine is global)
     for (currentLine = 0; currentLine < lineCount; currentLine++)
     {
-        char * line = code[currentLine];
-        int len = strlen(line);
+        char * rawline = code[currentLine];
+        char ** line;
+        int len = split(&line, rawline, " ");
         printf("::%d\n", len);
 
         if (verbose)
-            printf("%s\n", line);
+            printf("= %s\n", rawline);
 
         if (len >= 2)
         {
             // Flip bit
             int newVal = !varlistGet(reg, line[0]);
-            printf("{%d}\n", newVal);
             varlistAdd(reg, line[0], newVal);
 
             // Jump
@@ -224,7 +281,7 @@ int main(int argc, char ** argv)
     }
 
     for (int i = 0; i < reg->size; i++)
-        printf("[%c:%d]\n", reg->names[i], reg->values[i]);
+        printf("[%s:%d]\n", reg->names[i], reg->values[i]);
 
     quit(0);
 

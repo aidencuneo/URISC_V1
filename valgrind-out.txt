@@ -1,40 +1,114 @@
-==1302== Memcheck, a memory error detector
-==1302== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
-==1302== Using Valgrind-3.15.0 and LibVEX; rerun with -h for copyright info
-==1302== Command: bin/bainari examples/file.txt -V
-==1302== Parent PID: 1296
-==1302== 
-==1302== error calling PR_SET_PTRACER, vgdb might block
-==1302== 
-==1302== Process terminating with default action of signal 8 (SIGFPE)
-==1302==  Integer divide by zero at address 0x1008DC5F56
-==1302==    at 0x10A02D: run_instruction (bainari.c:185)
-==1302==    by 0x10A4B7: main (bainari.c:299)
-==1302== 
-==1302== HEAP SUMMARY:
-==1302==     in use at exit: 2,654 bytes in 3 blocks
-==1302==   total heap usage: 7 allocs, 4 frees, 7,758 bytes allocated
-==1302== 
-==1302== 24 bytes in 1 blocks are still reachable in loss record 1 of 3
-==1302==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1302==    by 0x109341: newStack (stack.c:11)
-==1302==    by 0x10A375: main (bainari.c:265)
-==1302== 
-==1302== 582 bytes in 1 blocks are still reachable in loss record 2 of 3
-==1302==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1302==    by 0x10A2C0: main (bainari.c:242)
-==1302== 
-==1302== 2,048 bytes in 1 blocks are still reachable in loss record 3 of 3
-==1302==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
-==1302==    by 0x109374: newStack (stack.c:16)
-==1302==    by 0x10A375: main (bainari.c:265)
-==1302== 
-==1302== LEAK SUMMARY:
-==1302==    definitely lost: 0 bytes in 0 blocks
-==1302==    indirectly lost: 0 bytes in 0 blocks
-==1302==      possibly lost: 0 bytes in 0 blocks
-==1302==    still reachable: 2,654 bytes in 3 blocks
-==1302==         suppressed: 0 bytes in 0 blocks
-==1302== 
-==1302== For lists of detected and suppressed errors, rerun with: -s
-==1302== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+==641== Memcheck, a memory error detector
+==641== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==641== Using Valgrind-3.15.0 and LibVEX; rerun with -h for copyright info
+==641== Command: bin/urisc_v1 examples/file.sh -V
+==641== Parent PID: 635
+==641== 
+==641== error calling PR_SET_PTRACER, vgdb might block
+==641== Invalid write of size 8
+==641==    at 0x109E1C: split (urisc_v1.c:93)
+==641==    by 0x10A4C5: main (urisc_v1.c:248)
+==641==  Address 0x4a4e040 is 0 bytes inside a block of size 24 free'd
+==641==    at 0x483CA3F: free (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==641==    by 0x10A41A: main (urisc_v1.c:233)
+==641==  Block was alloc'd at
+==641==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==641==    by 0x10A142: main (urisc_v1.c:167)
+==641== 
+==641== Invalid write of size 8
+==641==    at 0x109F74: split (urisc_v1.c:122)
+==641==    by 0x10A4C5: main (urisc_v1.c:248)
+==641==  Address 0x41 is not stack'd, malloc'd or (recently) free'd
+==641== 
+==641== 
+==641== Process terminating with default action of signal 11 (SIGSEGV)
+==641==  Access not within mapped region at address 0x41
+==641==    at 0x109F74: split (urisc_v1.c:122)
+==641==    by 0x10A4C5: main (urisc_v1.c:248)
+==641==  If you believe this happened as a result of a stack
+==641==  overflow in your program's main thread (unlikely but
+==641==  possible), you can try to increase the size of the
+==641==  main thread stack using the --main-stacksize= flag.
+==641==  The main thread stack size used in this run was 8388608.
+==641== 
+==641== HEAP SUMMARY:
+==641==     in use at exit: 3,105 bytes in 19 blocks
+==641==   total heap usage: 23 allocs, 4 frees, 8,209 bytes allocated
+==641== 
+==641== 32 bytes in 1 blocks are still reachable in loss record 1 of 14
+==641==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==641==    by 0x109737: newVarlist (varlist_2.0.c:13)
+==641==    by 0x10A424: main (urisc_v1.c:236)
+==641== 
+==641== 32 bytes in 1 blocks are still reachable in loss record 2 of 14
+==641==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==641==    by 0x109737: newVarlist (varlist_2.0.c:13)
+==641==    by 0x10A435: main (urisc_v1.c:237)
+==641== 
+==641== 32 bytes in 1 blocks are still reachable in loss record 3 of 14
+==641==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==641==    by 0x10A457: main (urisc_v1.c:241)
+==641== 
+==641== 32 bytes in 1 blocks are still reachable in loss record 4 of 14
+==641==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==641==    by 0x109E7A: split (urisc_v1.c:100)
+==641==    by 0x10A4C5: main (urisc_v1.c:248)
+==641== 
+==641== 32 bytes in 1 blocks are indirectly lost in loss record 5 of 14
+==641==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==641==    by 0x109D9E: split (urisc_v1.c:82)
+==641==    by 0x10A4C5: main (urisc_v1.c:248)
+==641== 
+==641== 64 bytes in 2 blocks are still reachable in loss record 6 of 14
+==641==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==641==    by 0x109D9E: split (urisc_v1.c:82)
+==641==    by 0x10A4C5: main (urisc_v1.c:248)
+==641== 
+==641== 65 bytes in 1 blocks are still reachable in loss record 7 of 14
+==641==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==641==    by 0x10A342: main (urisc_v1.c:206)
+==641== 
+==641== 128 bytes in 1 blocks are still reachable in loss record 8 of 14
+==641==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==641==    by 0x109767: newVarlist (varlist_2.0.c:16)
+==641==    by 0x10A435: main (urisc_v1.c:237)
+==641== 
+==641== 128 bytes in 4 blocks are definitely lost in loss record 9 of 14
+==641==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==641==    by 0x109E7A: split (urisc_v1.c:100)
+==641==    by 0x10A4C5: main (urisc_v1.c:248)
+==641== 
+==641== 256 bytes in 1 blocks are still reachable in loss record 10 of 14
+==641==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==641==    by 0x109767: newVarlist (varlist_2.0.c:16)
+==641==    by 0x10A424: main (urisc_v1.c:236)
+==641== 
+==641== 256 bytes in 1 blocks are still reachable in loss record 11 of 14
+==641==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==641==    by 0x10974C: newVarlist (varlist_2.0.c:15)
+==641==    by 0x10A435: main (urisc_v1.c:237)
+==641== 
+==641== 512 bytes in 1 blocks are still reachable in loss record 12 of 14
+==641==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==641==    by 0x10974C: newVarlist (varlist_2.0.c:15)
+==641==    by 0x10A424: main (urisc_v1.c:236)
+==641== 
+==641== 512 bytes in 1 blocks are still reachable in loss record 13 of 14
+==641==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==641==    by 0x109D79: split (urisc_v1.c:78)
+==641==    by 0x10A4C5: main (urisc_v1.c:248)
+==641== 
+==641== 1,056 (1,024 direct, 32 indirect) bytes in 2 blocks are definitely lost in loss record 14 of 14
+==641==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==641==    by 0x109D79: split (urisc_v1.c:78)
+==641==    by 0x10A4C5: main (urisc_v1.c:248)
+==641== 
+==641== LEAK SUMMARY:
+==641==    definitely lost: 1,152 bytes in 6 blocks
+==641==    indirectly lost: 32 bytes in 1 blocks
+==641==      possibly lost: 0 bytes in 0 blocks
+==641==    still reachable: 1,921 bytes in 12 blocks
+==641==         suppressed: 0 bytes in 0 blocks
+==641== 
+==641== For lists of detected and suppressed errors, rerun with: -s
+==641== ERROR SUMMARY: 5 errors from 4 contexts (suppressed: 0 from 0)
