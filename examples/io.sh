@@ -1,0 +1,14 @@
+/ / 0110
+print ?
+out ?
+print ?
+print ?
+out ?
+print ?
+
+/ / 0001
+print ?
+print ?
+print ?
+out ?
+print ?

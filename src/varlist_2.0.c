@@ -40,7 +40,6 @@ void varlistAdd(struct varlist * self, char * name, int value)
         if (!strcmp(self->names[i], name))
         {
             // If a variable with this name was found, modify it
-            free(name); // Name is not required, because it's already known
             self->values[i] = value;
 
             return;

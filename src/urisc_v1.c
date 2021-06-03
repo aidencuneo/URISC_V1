@@ -17,6 +17,10 @@ char ** code = NULL;
 int lineCount = 0;
 int currentLine = 0;
 
+// IO stuff
+char * outputBuffer = NULL;
+int outputBufferLen = 0;
+
 // Interpreter variables
 struct varlist * reg;
 struct varlist * labels;
@@ -236,6 +240,9 @@ int main(int argc, char ** argv)
     reg = newVarlist(64); // Block size is 64
     labels = newVarlist(32); // Block size is 32
 
+    // Setup IO stuff
+    outputBuffer = malloc(8 + 1);
+
     // Fetch lines of code
     int i = 0;
     code = malloc(lineCount * sizeof(char *));
@@ -275,14 +282,34 @@ int main(int argc, char ** argv)
         char ** line;
         int len = split(&line, rawline, " ");
 
-        if (verbose)
-            printf("= %s\n", rawline);
+        // if (verbose)
+        //     printf("= %s\n", rawline);
 
-        if (len >= 2)
+        if (len == 2)
         {
             // Flip bit
             int newVal = !varlistGet(reg, line[0]);
             varlistAdd(reg, line[0], newVal);
+
+            if (!strcmp(line[0], "print"))
+            {
+                outputBuffer[outputBufferLen++] = '0' + !!varlistGetDef(reg, "out", 0);
+
+                // Flush the buffer when it reaches a full byte
+                if (outputBufferLen == 8)
+                {
+                    // Suffix output buffer with a null byte
+                    outputBuffer[outputBufferLen] = '\0';
+
+                    // Convert output buffer to char (Big Endian)
+                    char ch = strtol(outputBuffer, NULL, 2);
+                    printf("%c", ch);
+
+                    free(outputBuffer);
+                    outputBuffer = malloc(8 + 1);
+                    outputBufferLen = 0;
+                }
+            }
 
             // Jump
             if (newVal)
@@ -290,8 +317,9 @@ int main(int argc, char ** argv)
         }
     }
 
-    for (int i = 0; i < reg->size; i++)
-        printf("[%s:%d]\n", reg->names[i], reg->values[i]);
+    if (verbose)
+        for (int i = 0; i < reg->size; i++)
+            printf("[%s:%d]\n", reg->names[i], reg->values[i]);
 
     quit(0);
 
