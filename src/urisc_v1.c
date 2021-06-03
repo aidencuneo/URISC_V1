@@ -58,14 +58,14 @@ void error(char * text, char * buffer, int pos)
 
 // Strip a string of carriage returns from the right hand side only
 // (Returns new string length)
-int rstripCarriageReturns(char * _str, int _len)
+int rstripCarriageReturns(char * _str)
 {
-    int i = _len;
+    int i = strlen(_str) - 1;
 
-    while (_str[--i] == '\r' || _str[i] == '\0')
-        _str[i] = '\0';
+    while (_str[i] == '\r' || _str[i] == '\0')
+        _str[i--] = '\0';
 
-    return i;
+    return i + 1;
 }
 
 // Split a string at a given delimiter
@@ -90,7 +90,7 @@ int split(char *** result, char * _str, char * _delim)
             // Suffix string with a null byte
             currentstr[currentstrlen] = '\0';
 
-            *result[reslen++] = currentstr;
+            (*result)[reslen++] = currentstr;
 
             // Expand list if it isn't big enough
             if (reslen >= reslimit - 1)
@@ -116,10 +116,10 @@ int split(char *** result, char * _str, char * _delim)
     }
 
     // Suffix string with a null byte
-    currentstr[currentstrlen++] = '\0';
+    currentstr[currentstrlen] = '\0';
 
     // Final string
-    *result[reslen++] = currentstr;
+    (*result)[reslen++] = currentstr;
 
     return reslen;
 }
@@ -244,26 +244,36 @@ int main(int argc, char ** argv)
     while (filePtr != NULL)
     {
         code[i] = filePtr;
+        rstripCarriageReturns(code[i]);
         char ** line;
         int len = split(&line, code[i], " ");
 
-        printf("[%s]\n", line[0]);
+        // for (int j = 0; j < len; j++)
+        //     printf("[%d:%s]\n", j, line[j]);
 
         // Define labels
         if (len == 1)
             varlistAdd(labels, line[0], i);
 
         filePtr = strtok(NULL, "\n;");
-        i++;
+        ++i;
     }
 
     // (currentLine is global)
     for (currentLine = 0; currentLine < lineCount; currentLine++)
     {
         char * rawline = code[currentLine];
+
+        if (!rawline)
+            continue;
+
+        int rawlen = rstripCarriageReturns(rawline);
+
+        if (rawlen <= 0)
+            continue;
+
         char ** line;
         int len = split(&line, rawline, " ");
-        printf("::%d\n", len);
 
         if (verbose)
             printf("= %s\n", rawline);
