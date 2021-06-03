@@ -1,5 +1,4 @@
 a ?
-a ?
 b ?
 c_in ?
 
@@ -47,4 +46,3 @@ c_out ?
 or_end_2
 or_end_1
 c_out ?
-

@@ -1,14 +1,87 @@
-/ / 0110
+/ / 0100 0001 (A)
 print ?
 out ?
+print ?
+out ?
+print ?
+print ?
+print ?
+print ?
+print ?
+out ?
+print ?
+out ?
+
+/ / 0110 1001 (i)
+print ?
+out ?
+print ?
+print ?
+out ?
+print ?
+out ?
+print ?
+out ?
+print ?
+print ?
+out ?
+print ?
+out ?
+
+/ / 0110 0100 (d)
+print ?
+out ?
+print ?
+print ?
+out ?
+print ?
+print ?
+out ?
+print ?
+out ?
+print ?
+print ?
+
+/ / 0110 0101 (e)
+print ?
+out ?
+print ?
+print ?
+out ?
+print ?
+print ?
+out ?
+print ?
+out ?
+print ?
+out ?
+print ?
+out ?
+
+/ / 0110 1110 (n)
+print ?
+out ?
+print ?
+print ?
+out ?
+print ?
+out ?
+print ?
 print ?
 print ?
 out ?
 print ?
 
-/ / 0001
+/ / 0000 1010 (\n)
 print ?
 print ?
+print ?
+print ?
+out ?
+print ?
+out ?
+print ?
+out ?
 print ?
 out ?
 print ?

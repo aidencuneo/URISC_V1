@@ -319,7 +319,7 @@ int main(int argc, char ** argv)
 
     if (verbose)
         for (int i = 0; i < reg->size; i++)
-            printf("[%s:%d]\n", reg->names[i], reg->values[i]);
+            printf("[%s : %d]\n", reg->names[i], reg->values[i]);
 
     quit(0);
 
