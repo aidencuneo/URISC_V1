@@ -18,6 +18,8 @@ int lineCount = 0;
 int currentLine = 0;
 
 // IO stuff
+char inputBuffer = '\0'; // Just one character at a time
+int inputBufferIndex = 0;
 char * outputBuffer = NULL;
 int outputBufferLen = 0;
 
@@ -287,6 +289,21 @@ int main(int argc, char ** argv)
 
         if (len == 2)
         {
+            if (!strcmp(line[0], "in"))
+            {
+                // Fill the input buffer when it has fully been read
+                if (inputBufferIndex == 8)
+                {
+                    // Those sneaky [0]'s after each `fgets` call are to prevent the
+                    // -Wunused-result warning from coming up during compilation
+                    char in[2] = {0};
+                    fgets(in, 2, stdin)[0];
+
+                    inputBuffer = *in;
+                    inputBufferIndex = 0;
+                }
+            }
+
             // Flip bit
             int newVal = !varlistGet(reg, line[0]);
             varlistAdd(reg, line[0], newVal);
