@@ -103,10 +103,54 @@ class URISC_V1_Extended:
                 out += line[1] + ' ?\n'
 
         elif line[0] == 'jump':
-            out = '? ' + line[1] + '\n'
+            out = (
+                '? ' + line[1] + '\n' +
+                '? ' + line[1] + '\n'
+            )
+
+        elif line[0] == 'if':
+            exp = self.compexp(line[1])
+            label = line[2]
+
+            # Jump to label if expression result is 1
+            out = (
+                exp + ' ?\n' +
+                exp + ' ' + label + '\n'
+            )
+
+        elif line[0] == 'ifn':
+            exp = self.compexp(line[1])
+            label = line[2]
+
+            # Jump to label if expression result is 0
+            out = exp + ' ' + label + '\n'
 
         elif line[0] == 'label':
             out = line[1] + '\n'
+
+        elif line[0] == 'print':
+            # Iterate over each expression in the line and print it as a bit
+            for bit in line[1:]:
+                exp = self.compexp(bit)
+
+                # Print bit to output buffer
+                label_1 = self.get_label()
+                label_2 = self.get_label()
+
+                out += (
+                    # Set out to 0
+                    label_1 + '\n' +
+                    'out ' + label_1 + '\n' +
+
+                    # Invert out if expression result
+                    exp + ' ' + label_2 + '\n' +
+                    'out ?\n' +
+                    label_2 + '\n' +
+                    exp + ' ?\n' +
+
+                    # Print bit to output buffer
+                    'print ?\n'
+                )
 
         elif '=' in line:
             # var = exp
@@ -165,18 +209,23 @@ class URISC_V1_Extended:
             # Perform operations
             if op == '!':
                 label_1 = self.get_label()
-                temp_1 = self.get_temp()
+                label_2 = self.get_label()
+
+                # Return the result of this code
+                out = self.get_temp()
 
                 # Add literal code to the output
                 self.output.append(
-                    a + ' ?\n' +
-                    a + ' ' + label_1 + '\n' +
-                    temp_1 + ' ?\n' +
-                    label_1 + '\n'
-                )
+                    # Set out to 0
+                    label_1 + '\n' +
+                    out + ' ' + label_1 + '\n' +
 
-                # Return the result of this code
-                out = temp_1
+                    # Invert out if not a
+                    a + ' ?\n' +
+                    a + ' ' + label_2 + '\n' +
+                    out + ' ?\n' +
+                    label_2 + '\n'
+                )
 
                 '''
                 a ?
@@ -191,111 +240,137 @@ class URISC_V1_Extended:
             exp = self.tokln(line[0][1:-1])
 
             # Get result of (a op b) and store in a temporary variable
-            a = exp[0]
-            op = exp[1]
-            b = exp[2]
+            while len(exp) > 1:
+                a = exp[0]
+                op = exp[1]
+                b = exp[2]
 
-            # Expression expansion
-            if a.startswith('(') and a.endswith(')'):
-                a = self.compexp(a)
-            if b.startswith('(') and b.endswith(')'):
-                b = self.compexp(b)
+                result = ''
 
-            # Perform operations
-            if op == '&':
-                label_1 = self.get_label()
-                label_2 = self.get_label()
+                # Expression expansion
+                if a.startswith('(') and a.endswith(')'):
+                    a = self.compexp(a)
+                if b.startswith('(') and b.endswith(')'):
+                    b = self.compexp(b)
 
-                # Return the result of this code
-                out = self.get_temp()
+                # Perform operations
+                if op == '&':
+                    label_1 = self.get_label()
+                    label_2 = self.get_label()
+                    label_3 = self.get_label()
 
-                # Add literal code to the output
-                self.output.append(
-                    a + ' ' + label_1 + '\n' +
-                    b + ' ' + label_2 + '\n' +
-                    out + ' ?\n' +
-                    label_2 + '\n' +
-                    b + ' ?\n' +
-                    label_1 + '\n' +
-                    a + ' ?\n'
-                )
+                    # Return the result of this code
+                    result = self.get_temp()
 
-                '''
-                a end_1
-                b end_2
-                output ?
-                end_2
-                b ?
-                end_1
-                a ?
-                '''
+                    # Add literal code to the output
+                    self.output.append(
+                        # Set result to 0
+                        label_1 + '\n' +
+                        result + ' ' + label_1 + '\n' +
 
-            elif op == '|':
-                label_1 = self.get_label()
-                label_2 = self.get_label()
+                        # Perform logical and
+                        a + ' ' + label_2 + '\n' +
+                        b + ' ' + label_3 + '\n' +
+                        result + ' ?\n' +
+                        label_3 + '\n' +
+                        b + ' ?\n' +
+                        label_2 + '\n' +
+                        a + ' ?\n'
+                    )
 
-                # Return the result of this code
-                out = self.get_temp()
+                    '''
+                    a end_1
+                    b end_2
+                    output ?
+                    end_2
+                    b ?
+                    end_1
+                    a ?
+                    '''
 
-                # Add literal code to the output
-                self.output.append(
-                    a + ' ?\n' +
-                    a + ' ' + label_1 + '\n' +
-                    b + ' ?\n' +
-                    b + ' ' + label_2 + '\n' +
-                    out + ' ?\n' +
-                    label_2 + '\n' +
-                    label_1 + '\n' +
-                    out + ' ?\n'
-                )
+                elif op == '|':
+                    label_1 = self.get_label()
+                    label_2 = self.get_label()
+                    label_3 = self.get_label()
 
-                '''
-                a ?
-                a end_1
-                b ?
-                b end_2
-                output ?
-                end_2
-                end_1
+                    # Return the result of this code
+                    result = self.get_temp()
 
-                output ?
-                '''
+                    # Add literal code to the output
+                    self.output.append(
+                        # Set result to 0
+                        label_1 + '\n' +
+                        result + ' ' + label_1 + '\n' +
 
-            elif op == '^':
-                label_1 = self.get_label()
-                label_2 = self.get_label()
+                        # Perform logical or
+                        a + ' ?\n' +
+                        a + ' ' + label_2 + '\n' +
+                        b + ' ?\n' +
+                        b + ' ' + label_3 + '\n' +
+                        result + ' ?\n' +
+                        label_3 + '\n' +
+                        label_2 + '\n' +
+                        result + ' ?\n'
+                    )
 
-                # Return the result of this code
-                out = self.get_temp()
+                    '''
+                    a ?
+                    a end_1
+                    b ?
+                    b end_2
+                    output ?
+                    end_2
+                    end_1
 
-                # Add literal code to the output
-                self.output.append(
-                    a + ' ' + label_1 + '\n' +
-                    out + ' ?\n' +
-                    label_1 + '\n' +
-                    a + ' ?\n' +
+                    output ?
+                    '''
 
-                    b + ' ' + label_2 + '\n' +
-                    out + ' ?\n' +
-                    label_2 + '\n' +
-                    b + ' ?\n'
-                )
+                elif op == '^':
+                    label_1 = self.get_label()
+                    label_2 = self.get_label()
+                    label_3 = self.get_label()
 
-                '''
-                a end_1
-                output ?
-                end_1
-                a ?
+                    # Return the result of this code
+                    result = self.get_temp()
 
-                b end_2
-                output ?
-                end_2
-                b ?
+                    # Add literal code to the output
+                    self.output.append(
+                        # Set result to 0
+                        label_1 + '\n' +
+                        result + ' ' + label_1 + '\n' +
 
-                '''
+                        # Perform logical xor
+                        a + ' ' + label_2 + '\n' +
+                        result + ' ?\n' +
+                        label_2 + '\n' +
+                        a + ' ?\n' +
 
-            else:
-                raise Exception('That\'s not a logic gate')
+                        b + ' ' + label_3 + '\n' +
+                        result + ' ?\n' +
+                        label_3 + '\n' +
+                        b + ' ?\n'
+                    )
+
+                    '''
+                    a end_1
+                    output ?
+                    end_1
+                    a ?
+
+                    b end_2
+                    output ?
+                    end_2
+                    b ?
+
+                    '''
+
+                else:
+                    raise Exception('invalid binary operation: "' + op + '"')
+
+                exp[:3] = [result]
+
+            # Return the final result
+            out = exp[0]
 
         # Function calling
         elif line[0].startswith('!(') and line[0].endswith(')'):
@@ -369,15 +444,20 @@ class URISC_V1_Extended:
         # Keywords
         elif line[0] == 'in':
             label_1 = self.get_label()
+            label_2 = self.get_label()
 
             # Return the result of this code
             out = self.get_temp()
 
             self.output.append(
-                # Invert temp var if input bit is 1
-                'in ' + label_1 + '\n' +
-                out + ' ?\n' +
+                # Set out to 0
                 label_1 + '\n' +
+                out + ' ' + label_1 + '\n' +
+
+                # Invert out if input bit is 1
+                'in ' + label_2 + '\n' +
+                out + ' ?\n' +
+                label_2 + '\n' +
                 out + ' ?\n'
             )
 
