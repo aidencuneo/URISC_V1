@@ -18,8 +18,8 @@ int lineCount = 0;
 int currentLine = 0;
 
 // IO stuff
-char inputBuffer = '\0'; // Just one character at a time
-int inputBufferIndex = 0;
+char * inputBuffer = NULL;
+int inputBufferIndex = 8; // Starts fully read
 char * outputBuffer = NULL;
 int outputBufferLen = 0;
 
@@ -289,24 +289,49 @@ int main(int argc, char ** argv)
 
         if (len == 2)
         {
+            int newVal = 0;
+
             if (!strcmp(line[0], "in"))
             {
                 // Fill the input buffer when it has fully been read
                 if (inputBufferIndex == 8)
                 {
-                    // Those sneaky [0]'s after each `fgets` call are to prevent the
-                    // -Wunused-result warning from coming up during compilation
+                    // The definition of _temp is just to prevent the
+                    // -Wunused-result warning from coming up during
+                    // compilation
                     char in[2] = {0};
-                    fgets(in, 2, stdin)[0];
+                    char * _temp = fgets(in, 2, stdin);
 
-                    inputBuffer = *in;
+                    // Prepare input buffer
+                    free(inputBuffer);
+                    inputBuffer = malloc(8 + 1);
+
+                    // Set index to zero so the input buffer can be reset
+                    inputBufferIndex = 0;
+
+                    // Push binary representation of char into input buffer
+                    for (int i = 7; i >= 0; --i)
+                    {
+                        int bit = (*in & (1 << i));
+
+                        // '1' if bit else '0'
+                        inputBuffer[inputBufferIndex++] = '0' + !!bit;
+                    }
+
+                    // Reset input buffer index
                     inputBufferIndex = 0;
                 }
+                // Otherwise, use the input buffer
+                else
+                    newVal = inputBuffer[inputBufferIndex++] - '0';
             }
 
             // Flip bit
-            int newVal = !varlistGet(reg, line[0]);
-            varlistAdd(reg, line[0], newVal);
+            else
+            {
+                newVal = !varlistGet(reg, line[0]);
+                varlistAdd(reg, line[0], newVal);
+            }
 
             if (!strcmp(line[0], "print"))
             {
