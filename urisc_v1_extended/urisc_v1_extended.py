@@ -363,12 +363,26 @@ class URISC_V1_Extended:
         # Digits
         elif line[0] == '0':
             return '_ZERO'
-
         elif line[0] == '1':
             return '_ONE'
 
+        # Keywords
+        elif line[0] == 'in':
+            label_1 = self.get_label()
+
+            # Return the result of this code
+            out = self.get_temp()
+
+            self.output.append(
+                # Invert temp var if input bit is 1
+                'in ' + label_1 + '\n' +
+                out + ' ?\n' +
+                label_1 + '\n' +
+                out + ' ?\n'
+            )
+
         else:
-            out = expression
+            return expression
 
         return out
 

@@ -321,9 +321,9 @@ int main(int argc, char ** argv)
                     // Reset input buffer index
                     inputBufferIndex = 0;
                 }
-                // Otherwise, use the input buffer
-                else
-                    newVal = inputBuffer[inputBufferIndex++] - '0';
+
+                // Use next bit in the input buffer
+                newVal = inputBuffer[inputBufferIndex++] - '0';
             }
 
             // Flip bit
