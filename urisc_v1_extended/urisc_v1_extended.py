@@ -6,7 +6,7 @@ class URISC_V1_Extended:
 
     def __init__(self, code):
         self.code = code
-        self.output = ['_ONE ?\n']
+        self.output = ['1 ?\n']
         self.functions = {}
         self.label_num = 0
         self.temp_num = 0
@@ -76,7 +76,7 @@ class URISC_V1_Extended:
         # Filter
         out = [a for a in out if a]
 
-        print(out)
+        # print(out)
 
         return out
 
@@ -86,6 +86,9 @@ class URISC_V1_Extended:
 
         if not line or line[0].startswith('#'):
             return ''
+
+        if line[0] == '```':
+            out = ' '.join(line[1:])
 
         if line[0] == 'invert':
             out = line[1] + ' ?\n'
@@ -383,7 +386,7 @@ class URISC_V1_Extended:
             function = self.functions[name]
             func_args = function[0]
             exp = function[1]
-            print('Calling', function, 'with', args)
+            # print('Calling', function, 'with', args)
 
             # Check arg lengths
             if len(args) != len(func_args):
@@ -437,9 +440,9 @@ class URISC_V1_Extended:
 
         # Digits
         elif line[0] == '0':
-            return '_ZERO'
+            return '0'
         elif line[0] == '1':
-            return '_ONE'
+            return '1'
 
         # Keywords
         elif line[0] == 'in':
@@ -467,12 +470,12 @@ class URISC_V1_Extended:
         return out
 
     def get_label(self):
-        label = 'LABEL_' + str(self.label_num)
+        label = 'L_' + str(self.label_num)
         self.label_num += 1
         return label
 
     def get_temp(self):
-        temp = 'TEMP_' + str(self.temp_num)
+        temp = 'T_' + str(self.temp_num)
         self.temp_num += 1
         return temp
 
@@ -483,8 +486,8 @@ with open(sys.argv[1]) as f:
 compiler = URISC_V1_Extended(code)
 compiler.comp()
 
-print('\n\nResult code:\n\n')
-print(compiler.output)
+# print('\n\nResult code:\n\n')
+# print(compiler.output)
 
-with open(sys.argv[1] + '.out', 'w') as f:
+with open(sys.argv[1] + '.urisc_v1', 'w') as f:
     f.write(compiler.output)
