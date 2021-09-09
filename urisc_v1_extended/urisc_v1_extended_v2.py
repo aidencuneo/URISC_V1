@@ -34,9 +34,9 @@ class Variable:
         return ''.join(out)
 
     def add(self, other, result_var, compiler):
-        out = []
-
         c_in = compiler.get_temp()
+
+        out = [f'{c_in} = 0\n']
 
         for bit_index in range(self.bit_size - 1, -1, -1):
             bit = result_var.names[bit_index]
@@ -48,6 +48,26 @@ class Variable:
 {bit} = (({a} ^ {b}) ^ {c_in})
 {c_in} = (({a} ^ {b} & {c_in}) | ({a} & {b}))
             '''.strip() + '\n')
+
+        # Append compiled code to the compiled output
+        compiler.output.append(''.join(out))
+
+    def as_boolean(self, result_var, compiler):
+        out = []
+
+        result_value = compiler.get_temp()
+
+        # Remember whether or not the result should be true
+        b0, b1, b2, b3, b4, b5, b6, b7 = self.names
+        out.append(f'{result_value} = ({b0} | {b1} | {b2} | {b3} | {b4} | {b5} | {b6} | {b7})\n')
+
+        # Set new variable to 0
+        for bit in result_var.names:
+            out.append(f'{bit} = 0\n')
+
+        # Recall whether or not the result should be true
+        last_bit = result_var.names[-1]
+        out.append(f'{last_bit} = {result_value}\n')
 
         # Append compiled code to the compiled output
         compiler.output.append(''.join(out))
@@ -86,11 +106,11 @@ class Variable:
         compiler.output.append(''.join(out))
 
 
-class URISC_V1_Extended:
+class URISC_V1_Extended_V2:
 
     def __init__(self, code):
         self.code = code
-        self.output = ['_ONE = 1\n']
+        self.output = []
 
         self.protected_vars = []
         self.var = {}
@@ -180,46 +200,28 @@ class URISC_V1_Extended:
         if not line or line[0].startswith('#'):
             return ''
 
-        if line[0] == 'invert':
-            out = line[1] + ' ?\n'
-
-        elif line[0] == 'set':
-            # Set variable to 0
-            label = self.get_label()
-            out = (
-                label + '\n' +
-                line[1] + ' ' + label + '\n'
-            )
-
-            # Invert variable if desired
-            if line[2] != '0' and line[2] != 'false':
-                out += line[1] + ' ?\n'
-
-        elif line[0] == 'jump':
-            out = (
-                '? ' + line[1] + '\n' +
-                '? ' + line[1] + '\n'
-            )
+        if line[0] == 'jump':
+            out = 'jump ' + line[1] + '\n'
 
         elif line[0] == 'if':
             exp = self.compexp(line[1])
             label = line[2]
 
-            # Jump to label if expression result is 1
+            # Jump to label if expression result is truthy
             out = (
                 exp + ' ?\n' +
                 exp + ' ' + label + '\n'
             )
 
-        elif line[0] == 'ifn':
-            exp = self.compexp(line[1])
-            label = line[2]
+        # elif line[0] == 'ifn':
+        #     exp = self.compexp(line[1])
+        #     label = line[2]
 
-            # Jump to label if expression result is 0
-            out = exp + ' ' + label + '\n'
+        #     # Jump to label if expression result is 0
+        #     out = exp + ' ' + label + '\n'
 
         elif line[0] == 'label':
-            out = line[1] + '\n'
+            out = 'label ' + line[1] + '\n'
 
         elif line[0] == 'print':
             exp = self.compexp(line[1])
@@ -247,7 +249,7 @@ class URISC_V1_Extended:
             # label_2 = self.get_label()
 
         elif '=>' in line:
-            # func => arg1,arg2,arg2 ((arg1 & arg2) | arg3)
+            # func => arg1,arg2,arg2 (arg1 & arg2 | arg3)
             name = line[0]
             args = line[2].split(',')
             exp = line[3]
@@ -452,23 +454,12 @@ class URISC_V1_Extended:
 
         # Keywords
         elif line[0] == 'in':
-            label_1 = self.get_label()
-            label_2 = self.get_label()
+            out = Variable(self.get_temp(), list('0' * 8))
 
-            # Return the result of this code
-            out = self.get_temp()
-
-            self.output.append(
-                # Set out to 0
-                label_1 + '\n' +
-                out + ' ' + label_1 + '\n' +
-
-                # Invert out if input bit is 1
-                'in ' + label_2 + '\n' +
-                out + ' ?\n' +
-                label_2 + '\n' +
-                out + ' ?\n'
-            )
+            # Get one byte of input
+            for i in range(out.bit_size):
+                bit = out.names[i]
+                self.output.append(f'{bit} = in\n')
 
         return out
 
@@ -486,7 +477,7 @@ class URISC_V1_Extended:
 with open(sys.argv[1]) as f:
     code = f.read()
 
-compiler = URISC_V1_Extended(code)
+compiler = URISC_V1_Extended_V2(code)
 compiler.comp()
 
 print('\n\nResult code:\n\n')
